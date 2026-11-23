@@ -1,10 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from schemas import Libro, LibroConId, LibroParcial
+from datos import calcular_proximo_id, cargar, guardar
 
 app = FastAPI()
 
-libros = []
-proximo_id = 1
+libros = cargar()
+proximo_id = calcular_proximo_id(libros)
 
 #Tanto GET /libros/{id}, DELETE, PUT y PATCH necesitan buscar un libro y lanzar 404 si no existe.
 def buscar_libro(id: int):
@@ -85,6 +86,7 @@ def crear_libro(libro: Libro):
     # ** "desarma" ese diccionario adentro de otro nuevo para pegarle el "id"
     proximo_id += 1
     libros.append(nuevo)
+    guardar(libros)
     return nuevo
 
 
@@ -98,6 +100,7 @@ def obtener_libro(id: int):
 def reemplazar_libro(id: int, datos: Libro):
     libro = buscar_libro(id)
     libro.update(datos.model_dump())
+    guardar(libros)
     return libro
 
 
@@ -110,6 +113,7 @@ def actualizar_parcial(id: int, datos: LibroParcial):
     #Pydantic te devuelve únicamente los campos que el cliente realmente mandó en el JSON.
     libro.update(cambios)
     #actualiza únicamente las claves que vienen en cambios y deja el resto como estaba.
+    guardar(libros)
     return libro
 
 
@@ -118,3 +122,4 @@ def actualizar_parcial(id: int, datos: LibroParcial):
 def borrar_libro(id: int):
     libro = buscar_libro(id)
     libros.remove(libro)
+    guardar(libros)
