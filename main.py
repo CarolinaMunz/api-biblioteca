@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from schemas import Libro, LibroConId
+from schemas import Libro, LibroConId, LibroParcial
 
 app = FastAPI()
 
@@ -44,3 +44,21 @@ def obtener_libro(id: int):
 def borrar_libro(id: int):
     libro = buscar_libro(id)
     libros.remove(libro)
+
+#PUT reemplaza todos los campos del libro con los enviados, mantiene el mismo id y devuelve 200.
+@app.put("/libros/{id}", response_model=LibroConId)
+def reemplazar_libro(id: int, datos: Libro):
+    libro = buscar_libro(id)
+    libro.update(datos.model_dump())
+    return libro
+
+# actualiza solo los campos enviados y deja el resto igual, devolviendo 200 con el libro completo. 
+# Un cuerpo vacío {} devuelve 200 sin cambios.
+@app.patch("/libros/{id}", response_model=LibroConId)
+def actualizar_parcial(id: int, datos: LibroParcial):
+    libro = buscar_libro(id)
+    cambios = datos.model_dump(exclude_unset=True)
+    #Pydantic te devuelve únicamente los campos que el cliente realmente mandó en el JSON.
+    libro.update(cambios)
+    #actualiza únicamente las claves que vienen en cambios y deja el resto como estaba.
+    return libro
