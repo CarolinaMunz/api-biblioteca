@@ -70,6 +70,18 @@ def buscar_libros(texto: str): #Al no poner valor por defecto es obligatorio
         if buscado in libro["titulo"].lower() or buscado in libro["autor"].lower()
     ]
 
+# /libros/estadisticas es una ruta fija, así que tiene que ir declarada arriba de /libros/{id}. 
+# Si la pongo abajo, FastAPI intenta convertir "estadisticas" a int y devuelve 422.
+@app.get("/libros/estadisticas")
+def obtener_estadisticas():
+    total = len(libros)
+    disponibles = sum(1 for libro in libros if libro["disponible"])
+    prestados = total - disponibles
+    return {
+        "total": total,
+        "disponibles": disponibles,
+        "prestados": prestados,
+    }
 
 
 @app.post("/libros", status_code=201, response_model=LibroConId)
@@ -123,3 +135,24 @@ def borrar_libro(id: int):
     libro = buscar_libro(id)
     libros.remove(libro)
     guardar(libros)
+
+
+@app.post("/libros/{id}/prestar", response_model=LibroConId)
+def prestar_libro(id: int):
+    libro = buscar_libro(id)
+    if not libro["disponible"]:
+        raise HTTPException(status_code=409, detail="El libro ya está prestado")
+    #Igual que con los duplicados, no podés prestar un libro que ya está prestado.
+    libro["disponible"] = False
+    guardar(libros)
+    return libro
+
+
+@app.post("/libros/{id}/devolver", response_model=LibroConId)
+def devolver_libro(id: int):
+    libro = buscar_libro(id)
+    if libro["disponible"]:
+        raise HTTPException(status_code=409, detail="El libro ya está disponible")
+    libro["disponible"] = True
+    guardar(libros)
+    return libro

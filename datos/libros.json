@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "titulo": "Rayuela",
+    "autor": "Julio Cortázar",
+    "anio": 1963,
+    "disponible": true
+  },
+  {
+    "id": 2,
+    "titulo": "El Aleph",
+    "autor": "Jorge Luis Borges",
+    "anio": 1949,
+    "disponible": true
+  }
+]
