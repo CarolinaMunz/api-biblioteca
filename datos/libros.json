@@ -12,5 +12,12 @@
     "autor": "Jorge Luis Borges",
     "anio": 1949,
     "disponible": true
+  },
+  {
+    "id": 3,
+    "titulo": "Luna de Pluton",
+    "autor": "Dross Yt",
+    "anio": 2010,
+    "disponible": true
   }
 ]
